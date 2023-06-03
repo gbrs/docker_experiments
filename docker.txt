@@ -89,6 +89,9 @@ docker run -d --rm \
 https://labs.play-with-docker.com
 https://github.com/play-with-docker/play-with-docker
 
+docker network create my_net
+# создаем сеть, чтобы контейнеры ходили друг в друга
+
 #### postgres
 docker pull postgres
 docker run --rm -d \
@@ -97,11 +100,12 @@ docker run --rm -d \
 	-e POSTGRES_USER=postgres_admin \
 	-e POSTGRES_DB=test_app \
 	-v postgres_vol_1:/var/lib/postgresql/data \
+	--net=my_net\
 	postgres:14
 
 #### superset
 docker pull apache/superset
-docker run --rm -d -p 8080:8088 -e "SUPERSET_SECRET_KEY=12345" --name superset apache/superset
+docker run -d --rm --net=my_net -p 80:8088 -e "SUPERSET_SECRET_KEY=SprSt1504" --name superset apache/superset
 docker exec -it superset superset fab create-admin \
               --username admin \
               --firstname Superset \
@@ -109,13 +113,15 @@ docker exec -it superset superset fab create-admin \
               --email admin@superset.com \
               --password admin
 docker exec -it superset superset db upgrade
-docker exec -it superset superset load_examples  не делать!
 docker exec -it superset superset init
+
+НЕ ДЕЛАТЬ: docker exec -it superset superset load_examples
 
 кнопка OPEN PORT.
 What port would you like to open?
-8080
+80 ?
 
+При присоединении PostgreSQL хост - название нашего контейнера: postgres_1. Порт постгресовский - 5432
 
 
 wget https://stepik.org/media/attachments/lesson/745992/%D0%9F%D0%B0%D1%81%D1%81%D0%B0%D0%B6%D0%B8%D1%80%D0%BE%D0%BF%D0%BE%D1%82%D0%BE%D0%BA_%D0%9C%D0%BE%D1%81%D0%9C%D0%B5%D1%82%D1%80%D0%BE_2.csv

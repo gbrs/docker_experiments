@@ -109,8 +109,13 @@ docker exec -it superset superset fab create-admin \
               --email admin@superset.com \
               --password admin
 docker exec -it superset superset db upgrade
-docker exec -it superset superset load_examples
+docker exec -it superset superset load_examples  не делать!
 docker exec -it superset superset init
+
+кнопка OPEN PORT.
+What port would you like to open?
+8080
+
 
 
 wget https://stepik.org/media/attachments/lesson/745992/%D0%9F%D0%B0%D1%81%D1%81%D0%B0%D0%B6%D0%B8%D1%80%D0%BE%D0%BF%D0%BE%D1%82%D0%BE%D0%BA_%D0%9C%D0%BE%D1%81%D0%9C%D0%B5%D1%82%D1%80%D0%BE_2.csv

@@ -54,6 +54,7 @@ docker rmi nginx  # Удаление образа
 docker image prune  # Удаление неиспользуемых (dangling) образов
 docker rmi $(docker images -a -q)  # Удаление всех образов
 docker system prune  # Удаление всех неиспользуемых объектов
+    (контейнеров, образов, сетей и опционально папок --volume)
 docker volume prune  # Удаление неиспользуемых папок
 
 
@@ -144,5 +145,5 @@ What port would you like to open?
 При присоединении PostgreSQL хост - название нашего контейнера: postgres_1. Порт постгресовский - 5432
 
 Для присоединения к БД при docker run надо прокидывать порт: -p 5432:5432 (для postgreSQL)?
-
+docker run -it  # позволяет через баш работать внутри контейнера?
 

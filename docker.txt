@@ -8,10 +8,11 @@ docker ps -a  # Работающие контейнеры
 docker logs infinite  # Логи контейнера
 docker inspect infinite  # Информация о контейнере
 docker events infinite  # События контейнера
-docker port infinite  # Публичные порты
+docker port infinite  # Публичные порты контейнера
 docker top infinite  # Выполняющиеся процессы
 docker stats infinite  # Использование ресурсов
 docker diff infinite  # Изменения в файлах или директориях файловой системы контейнера
+docker volume ls  # Список всех папок (созданных контейнерами?)
 
 
 ### Реестры и репозитории Docker
@@ -53,10 +54,12 @@ docker rmi nginx  # Удаление образа
 docker image prune  # Удаление неиспользуемых (dangling) образов
 docker rmi $(docker images -a -q)  # Удаление всех образов
 docker system prune  # Удаление всех неиспользуемых объектов
+docker volume prune  # Удаление неиспользуемых папок
 
 
 ### Изменение контейнера
-docker exec -it e176ec2e0cd6bash bash  ## “вход” внутрь контейнер для внесения в него изменений
+docker exec -it e176ec2e0cd6bash bash  ## “вход” внутрь контейнер для внесения в него изменений,
+    установки библиотек, например
 docker commit -m "Комментарий" -a "Кто изменил" container_id repository/new_image_name
 docker push eon01/nginx
 docker create -t -i eon01/infinite --name infinite
@@ -89,6 +92,11 @@ docker run -d --rm \
 https://labs.play-with-docker.com
 https://github.com/play-with-docker/play-with-docker
 
+
+-------------------------------------------------------
+
+Код из видео https://www.youtube.com/watch?v=I1h2YaWW9PE
+
 docker network create my_net
 # создаем сеть, чтобы контейнеры ходили друг в друга
 
@@ -102,6 +110,18 @@ docker run --rm -d \
 	-v postgres_vol_1:/var/lib/postgresql/data \
 	--net=my_net\
 	postgres:14
+
+#### clickhouse
+docker run -d --rm \
+    --name clickhouse \
+    --net=my_net \
+    -v clickhouse_vol:/var/lib/clickhouse \
+    yandex/clickhouse-server
+
+docker exec superset pip install clickhouse-sqlalchemy
+
+При присоединении заполняем:
+clickhouse+native://clickhouse/default
 
 #### superset
 docker pull apache/superset
@@ -123,10 +143,6 @@ What port would you like to open?
 
 При присоединении PostgreSQL хост - название нашего контейнера: postgres_1. Порт постгресовский - 5432
 
-
-wget https://stepik.org/media/attachments/lesson/745992/%D0%9F%D0%B0%D1%81%D1%81%D0%B0%D0%B6%D0%B8%D1%80%D0%BE%D0%BF%D0%BE%D1%82%D0%BE%D0%BA_%D0%9C%D0%BE%D1%81%D0%9C%D0%B5%D1%82%D1%80%D0%BE_2.csv
-mv %D0%9F%D0%B0%D1%81%D1%81%D0%B0%D0%B6%D0%B8%D1%80%D0%BE%D0%BF%D0%BE%D1%82%D0%BE%D0%BA_%D0%9C%D0%BE%D1%81%D0%9C%D0%B5%D1%82%D1%80%D0%BE_2.csv 2.csv
-
-
+Для присоединения к БД при docker run надо прокидывать порт: -p 5432:5432 (для postgreSQL)?
 
 

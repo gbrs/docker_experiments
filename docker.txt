@@ -17,6 +17,7 @@ docker volume ls  # Список всех папок (созданных кон�
 
 ### Реестры и репозитории Docker
 docker pull nextcloud
+docker pull node:16  # номер версии
 docker push eon01/nginx
 
 

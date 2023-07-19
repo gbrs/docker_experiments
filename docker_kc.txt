@@ -1,0 +1,12 @@
+video 2.2
+docker pull node
+docker pull node:16
+docker pull yandex/clickhouse-server
+docker images
+docker rmi node:16
+
+
+
+
+
+

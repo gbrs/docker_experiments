@@ -60,7 +60,7 @@ docker volume prune  # Удаление неиспользуемых папок
 
 
 ### Изменение контейнера
-docker exec -it e176ec2e0cd6bash bash  ## “вход” внутрь контейнер для внесения в него изменений,
+docker exec -it e176ec2e0cd6 bash  ## “вход” внутрь контейнер для внесения в него изменений,
     установки библиотек, например
 docker commit -m "Комментарий" -a "Кто изменил" container_id repository/new_image_name
 docker push eon01/nginx

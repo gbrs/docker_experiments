@@ -5,8 +5,12 @@ docker pull yandex/clickhouse-server
 docker images
 docker rmi node:16
 
-
-
-
-
+video 2.3
+docker run node
+docker yandex/clickhouse-server
+docker ps -a
+docker stop yandex/clickhouse-server(?)
+docker run -it node
+docker rm container_name
+docker exec -it container_name bash
 

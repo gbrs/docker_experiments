@@ -23,7 +23,7 @@ docker push eon01/nginx
 
 ### Запуск и остановка контейнеров
 docker run -d -p 8080:80 nextcloud  # -d - в фоновом режиме
-docker run -it --name infinite -d eon01/infinite
+docker run -it --name infinite -d eon01/infinite  # интерактив, имя контейнера, фоновый режим
             --rm  # удалять контейнер при остановке
 docker rename infinite infinity  # Переименование контейнера
 docker rm infinite  # Удаление контейнера
@@ -63,6 +63,8 @@ docker volume prune  # Удаление неиспользуемых папок
 docker exec -it e176ec2e0cd6 bash  ## “вход” внутрь контейнер для внесения в него изменений,
     установки библиотек, например
 docker commit -m "Комментарий" -a "Кто изменил" container_id repository/new_image_name
+    # делаем из контейнера образ
+docker commit quirky_carson new_ubuntu:1
 docker push eon01/nginx
 docker create -t -i eon01/infinite --name infinite
 

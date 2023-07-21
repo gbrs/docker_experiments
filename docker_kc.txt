@@ -7,10 +7,14 @@ docker rmi node:16
 
 video 2.3
 docker run node
-docker yandex/clickhouse-server
+docker run --name click -d --rm yandex/clickhouse-server
 docker ps -a
 docker stop yandex/clickhouse-server(?)
 docker run -it node
 docker rm container_name
 docker exec -it container_name bash
+
+video 2.4
+docker stop $(docker ps -q)  # получив список контейнеров, остановить их все
+docker commit quirky_carson new_ubuntu:1
 

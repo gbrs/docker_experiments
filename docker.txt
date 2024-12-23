@@ -130,9 +130,21 @@ docker exec -it superset superset db upgrade
 docker exec -it superset superset init
 НЕ ДЕЛАТЬ: docker exec -it superset superset load_examples
 
+На labs.play-with-docker.com
 кнопка OPEN PORT.
 What port would you like to open?
 80 ?
+
+В суперсете.
+Справа-сверху кнопка+ - Data - Connect database.
+Выбираем PostgreSQL.
+Хост - postgres_1, порт - 5432, БД - test_app, логин и пароль - postgres_admin.
+Далее в этом же окошке, вкладка Advanced (?), открываем раздел SQL Lab. Галочки в Allow create table, Allow dml.
+А в разделе Security - Allow data upload. Нажимаем Finish.
+Теперь сверху заходим в Data - Databases. Там будет наша бд.
+Сверху в SQL Lab - SQL Editor. Выбираем нашу бд, схема public. Можем писать запросы.
+В правом верхнем углу Upload file to database - Upload SCV (сработает ли в PWD?).
+Вводим название таблицы, выбираем файл.
 
 При присоединении PostgreSQL хост - название нашего контейнера: postgres_1. Порт постгресовский - 5432
 
@@ -143,10 +155,15 @@ docker run -d --rm \
     -v clickhouse_vol:/var/lib/clickhouse \
     yandex/clickhouse-server
 
+Видимо, с суперсетом через ORMку работает кликхаус:
 docker exec superset pip install clickhouse-sqlalchemy
+docker restart superset
 
-При присоединении заполняем:
+При присоединении БД в суперсете заполняем поле SQL alchemy url:
 clickhouse+native://clickhouse/default
+По умолчанию login - default, а пароля - нет.
+Те же настройки, как для постгри делаем во вкладке Advanced.
+В SQL Editor, выбираем кликхаус, вводим CREATE DATABASE app, выбираем схему app.
 
 
 

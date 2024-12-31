@@ -102,21 +102,39 @@ https://github.com/play-with-docker/play-with-docker
 Код из видео https://www.youtube.com/watch?v=I1h2YaWW9PE
 
 docker volume create postgres_vol_1
-docker volume create postgres_vol_2
 docker volume create clickhouse_vol
+docker volume create postgres_vol_2
 
 # создаем сеть, чтобы контейнеры ходили друг в друга
 docker network create my_net
 
-#### postgres
+#### postgres_1
 docker run --rm -d \
 	--name postgres_1 \
 	-e POSTGRES_PASSWORD=postgres_admin \
 	-e POSTGRES_USER=postgres_admin \
 	-e POSTGRES_DB=test_app \
 	-v postgres_vol_1:/var/lib/postgresql/data \
-	--net=my_net\
+	--net=my_net \
 	postgres:14
+
+#### postgres_2
+docker run --rm -d \
+	--name postgres_2 \
+	-e POSTGRES_PASSWORD=postgres_admin \
+	-e POSTGRES_USER=postgres_admin \
+	-e POSTGRES_DB=test_app \
+	-v postgres_vol_2:/var/lib/postgresql/data \
+	--net=my_net \
+	-p 5432:5432 \
+	postgres:14
+
+#### clickhouse
+docker run -d --rm \
+    --name clickhouse \
+    --net=my_net \
+    -v clickhouse_vol:/var/lib/clickhouse \
+    yandex/clickhouse-server
 
 #### superset
 docker run -d --rm --net=my_net -p 80:8088 -e "SUPERSET_SECRET_KEY=SprSt1504" --name superset apache/superset
@@ -130,12 +148,18 @@ docker exec -it superset superset db upgrade
 docker exec -it superset superset init
 НЕ ДЕЛАТЬ: docker exec -it superset superset load_examples
 
+Видимо, с суперсетом через ORMку работает кликхаус:
+docker exec superset pip install clickhouse-sqlalchemy
+docker restart superset  -- не всегда срабатывает - суперсет закрывается, но не просыпается?
+
+docker exec -it superset pip install clickhouse-connect  -- так в видео не было, но теперь надо?
+
 На labs.play-with-docker.com
 кнопка OPEN PORT.
 What port would you like to open?
 80 ?
 
-В суперсете.
+В суперсете присоединяем PostgreSQL.
 Справа-сверху кнопка+ - Data - Connect database.
 Выбираем PostgreSQL.
 Хост - postgres_1, порт - 5432, БД - test_app, логин и пароль - postgres_admin.
@@ -148,25 +172,12 @@ What port would you like to open?
 
 При присоединении PostgreSQL хост - название нашего контейнера: postgres_1. Порт постгресовский - 5432
 
-#### clickhouse
-docker run -d --rm \
-    --name clickhouse \
-    --net=my_net \
-    -v clickhouse_vol:/var/lib/clickhouse \
-    yandex/clickhouse-server
-
-Видимо, с суперсетом через ORMку работает кликхаус:
-docker exec superset pip install clickhouse-sqlalchemy
-docker restart superset
-
-При присоединении БД в суперсете заполняем поле SQL alchemy url:
+При присоединении clickhouse в суперсете заполняем поле SQL alchemy url:
 clickhouse+native://clickhouse/default
 По умолчанию login - default, а пароля - нет.
 Те же настройки, как для постгри делаем во вкладке Advanced.
 В SQL Editor, выбираем кликхаус, вводим CREATE DATABASE app, выбираем схему app.
 
 
-
-Для присоединения к БД при docker run надо прокидывать порт: -p 5432:5432 (для postgreSQL)?
 docker run -it  # позволяет через баш работать внутри контейнера?
 

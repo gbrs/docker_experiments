@@ -1,0 +1,23 @@
+Можно устанавливать и через Windows/Docker Desktop, и через Ubuntu/Docker.
+
+Второй вариант, например: Поднимаем Apache Superset — необходимый и достаточный гайд.
+1. На рабочем ПК не с начала запускал код. "A Default SECRET_KEY was detected".
+Надо посмотреть как заменить его.
+
+Сработал такой вариант:
+docker run -d --rm -p 80:8088 -e "SUPERSET_SECRET_KEY=SprSt1504" --name superset apache/superset
+docker exec -it superset superset fab create-admin \
+              --username admin \
+              --firstname Superset \
+              --lastname Admin \
+              --email admin@superset.com \
+              --password admin
+docker exec -it superset superset db upgrade
+docker exec -it superset superset init
+docker exec -it superset superset load_examples
+Вход по http://localhost:80. Но работать можно только с браузера, установленного под Ubuntu.
+Как прокинуть порт в Windows?
+
+sudo docker container stop superset  # приостановить контейнер, но не удалять его? В т.ч. загруженные примеры?
+sudo docker container start superset
+но надо тогда в первой строке --rm убрать?

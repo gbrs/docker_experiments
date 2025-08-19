@@ -10,6 +10,8 @@ docker exec -it superset superset db upgrade
 docker exec -it superset superset init
 docker exec -it superset superset load_examples
 
+Нажать на кнопку 80 или Open Port и вписать 80.
+Откроется Superset. Username - admin, password - admin.
 
 
 в одну строчку для windows power shell:

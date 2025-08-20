@@ -12,7 +12,3 @@ docker exec -it superset superset load_examples
 
 Нажать на кнопку 80 или Open Port и вписать 80.
 Откроется Superset. Username - admin, password - admin.
-
-
-в одну строчку для windows power shell:
-docker exec -it superset superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin

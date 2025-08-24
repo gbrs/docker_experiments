@@ -1,0 +1,121 @@
+Команды в терминале Windows (запустив Docker Desktop)
+
+cd J:\docker
+mkdir airflow
+cd .\airflow\
+mkdir dags, logs, plugins, config, data -Force
+cd .\data\
+mkdir input, output
+
+Создать файл J:\docker\airflow\docker-compose.yml:
+```yaml
+# Этот файл определяет многоконтейнерное приложение Airflow
+# Docker Compose автоматически создаст сеть для связи между контейнерами
+# и управляет томами для хранения данных
+
+services:
+  # Сервис PostgreSQL - база данных для хранения метаданных Airflow
+  postgres:
+    image: postgres:17  # Используем официальный образ PostgreSQL 13 версии
+    environment:        # Переменные окружения для настройки БД
+      POSTGRES_USER: airflow      # Создаем пользователя 'airflow'
+      POSTGRES_PASSWORD: airflow  # Пароль для пользователя
+      POSTGRES_DB: airflow        # Создаем базу данных 'airflow'
+    volumes:
+      # Сохраняем данные БД в именованном томе (сохраняются между перезапусками)
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:       # Проверка здоровья контейнера - важно для зависимостей
+      test: ["CMD", "pg_isready", "-U", "airflow"]  # Проверяем доступность БД
+      interval: 30s    # Проверяем каждые 30 секунд
+      timeout: 10s     # Ждем ответа не более 10 секунд
+      retries: 5       # Количество попыток перед признанием неработоспособным
+
+  # Сервис инициализации - запускается ОДИН РАЗ для настройки Airflow
+  airflow-init:
+    image: apache/airflow:2.7.0  # Официальный образ Airflow
+    environment:                 # Настройки окружения Airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor  # Локальный исполнитель задач
+      # Строка подключения к БД: postgresql+psycopg2://user:password@host/dbname
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'  # Не загружать примеры DAG-ов
+    volumes:
+      # Привязка папок хост-машины к контейнеру (сохранение данных):
+      - ./dags:/opt/airflow/dags        # Ваши DAG-файлы - ОСНОВНАЯ ПАПКА!
+      - ./logs:/opt/airflow/logs        # Логи выполнения задач
+      - ./plugins:/opt/airflow/plugins  # Кастомные плагины и операторы
+      - ./config:/opt/airflow/config    # Конфигурационные файлы
+    command: >  # Команды, которые выполнятся при запуске этого сервиса
+      bash -c "
+        airflow db init &&  # Инициализирует структуру БД Airflow
+        # Создает администратора (логин: admin, пароль: admin)
+        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin
+      "
+    depends_on:  # Зависимости - ждем пока БД не станет доступной
+      postgres:
+        condition: service_healthy  # Ждем успешного прохождения healthcheck
+
+  # Веб-сервер Airflow - предоставляет пользовательский интерфейс
+  airflow-webserver:
+    image: apache/airflow:2.7.0  # Тот же образ Airflow
+    environment:                 # Те же настройки окружения
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:  # ТЕ ЖЕ САМЫЕ привязки томов - важно для consistency
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./config:/opt/airflow/config
+      - J:/docker/airflow/data:/opt/airflow/data  # дополнительно папка для данных
+    ports:
+      # Пробрасываем порт 8080 контейнера на порт 8080 хост-машины
+      # Веб-интерфейс будет доступен по http://localhost:8080
+      - "8080:8080"
+    command: webserver  # Запускаем веб-сервер Airflow
+    depends_on:  # Зависимости от других сервисов
+      - airflow-init  # Ждем завершения инициализации
+      - postgres      # Ждем готовности БД
+    restart: always  # Автоматически перезапускается при падении
+
+  # Планировщик Airflow - мозг системы, запускает задачи по расписанию
+  airflow-scheduler:
+    image: apache/airflow:2.7.0
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    volumes:  # ТЕ ЖЕ САМЫЕ привязки - scheduler тоже должен видеть DAG-файлы
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./config:/opt/airflow/config
+      - J:/docker/airflow/data:/opt/airflow/data  # дополнительно папка для данных
+    command: scheduler  # Запускаем планировщик
+    depends_on:
+      - airflow-init  # Ждем инициализации
+      - postgres      # Ждем БД
+    restart: always  # Автоперезапуск
+
+# Раздел для определения томов (постоянное хранилище)
+volumes:
+  postgres_data:  # Именованный том для хранения данных PostgreSQL
+    # Этот том автоматически создается Docker'ом и сохраняет данные БД
+    # между перезапусками контейнеров. Без него все метаданные Airflow
+    # терялись бы при остановке контейнера!
+```
+
+
+# Запустите инициализацию
+docker-compose up airflow-init
+
+# Запустите все сервисы в фоновом режиме
+docker-compose up -d
+
+
+http://localhost:8080, admin, admin. Надо подождать, как-то не сразу подключается.
+
+Для остановки:
+docker-compose down  # Остановка и удаление контейнеров (СОХРАНЯЕТ данные)
+
+После перезагрузки/остановки Docker перейдите в вашу рабочую папку и запустите контейнеры:
+cd J:\docker\airflow\
+docker-compose up -d

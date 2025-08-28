@@ -1,5 +1,9 @@
 Можно устанавливать и через Windows/Docker Desktop, и через Ubuntu/Docker.
+Ниже вариант через Windows и Docker Desktop.
 
+Запускаем Docker Desktop.
+
+Далее в Windows PowerShell работаем.
 docker volume create superset_db
 docker run -d --rm -p 80:8088 -v superset_db:/app/superset_home -e "SUPERSET_SECRET_KEY=SprSt1504" --name superset apache/superset
 docker exec -it superset superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin

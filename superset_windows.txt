@@ -13,24 +13,4 @@ docker stop superset
 В следующий раз перезапускать получается одной командой:
 docker run -d --rm -p 80:8088 -v superset_db:/app/superset_home -e "SUPERSET_SECRET_KEY=SprSt1504" --name superset apache/superset
 
-
-## Удалить?
-## Советы от дипсик, чтобы не загружать суперсет каждый раз. У меня в таком виде не сработало. Я сделал как выше
-Резюме и правильный алгоритм
-Первый запуск:
-docker volume create superset_db (создаем том)
-docker run -d -p 8080:8088 -v superset_db:/app/superset_home --name my_superset apache/superset:latest (запускаем контейнер с томом)
-docker exec ... superset db upgrade (инициализируем БД один раз)
-docker exec ... superset init (создаем учетную запись admin один раз)
-
-После перезагрузки/остановки Docker:
-Открываем Docker Desktop (ждем, пока он запустится).
-В консоли пишем: docker start superset
-Идем в браузере на http://localhost:8080 — все ваши дашборды и настройки на месте.
-
-Если что-то пошло не так и старый контейнер "сломался":
-docker stop superset (останавливаем старый)
-docker rm superset (удаляем старый контейнер)
-Запускаем команду из пункта 1.2 (с тем же томом superset_db) — данные восстановятся.
-Таким образом, образ (apache/superset:latest) вы качаете только один раз. А ваши данные сохраняются благодаря тому
-(superset_db), который переживает перезапуски и удаления контейнеров.
+Открываем суперсет в браузере: http://localhost:80
